@@ -5,7 +5,7 @@ const { Duplex, Transform } = require('streamx')
 const { matchSnapshot } = require('brittle-snapshot')
 
 test('initial render', async (t) => {
-  t.plan(2)
+  t.plan(3)
 
   const app = cellery`
     <Container id="main">
@@ -27,40 +27,9 @@ test('initial render', async (t) => {
       const msg = JSON.parse(data)
 
       t.is(msg.event, 'render')
-      t.is(msg.id, 'app')
-
-      server.close()
-      cb()
-    },
-    read(cb) {
-      cb(null)
-    }
-  })
-
-  server.connect(socket)
-})
-
-test('initial render - snapshot', async (t) => {
-  const app = cellery`
-    <Container id="main">
-      <Text id="greeting">Hello world!</Text>
-      <Text id="year">2026</Text>
-    </Container>
-  `
-
-  const stream = new Transform({
-    transform(data, cb) {
-      this.push(data)
-      cb()
-    }
-  })
-
-  const server = new HTMLServer({ app, stream })
-
-  const socket = new Duplex({
-    write(data, cb) {
-      const msg = JSON.parse(data)
+      t.is(msg.id, 'main')
       matchSnapshot(t, msg.content)
+
       server.close()
       cb()
     },
@@ -72,8 +41,8 @@ test('initial render - snapshot', async (t) => {
   server.connect(socket)
 })
 
-test('input event triggers re-render', async (t) => {
-  t.plan(2)
+test('re-render after input event', async (t) => {
+  t.plan(3)
 
   const app = cellery`
     <Container id="main">
@@ -82,7 +51,6 @@ test('input event triggers re-render', async (t) => {
   `
 
   let count = 0
-
   const counter = app.children[0]
 
   const stream = new Transform({
@@ -98,25 +66,24 @@ test('input event triggers re-render', async (t) => {
 
   const server = new HTMLServer({ app, stream })
 
-  let renders = 0
+  let initial = true
 
   const socket = new Duplex({
     write(data, cb) {
       const msg = JSON.parse(data)
 
-      if (renders === 0) {
-        // initial render of the full app
-        t.is(msg.id, 'app')
-        renders++
-
-        // simulate an input event from the client
+      if (initial) {
+        initial = false
+        t.is(msg.id, 'main')
         this.push(JSON.stringify({ event: 'increment' }))
-      } else {
-        // re-render of just the counter cell
-        t.is(msg.id, 'counter')
-        server.close()
+        cb()
+        return
       }
 
+      t.is(msg.id, 'counter')
+      matchSnapshot(t, msg.content)
+
+      server.close()
       cb()
     },
     read(cb) {
@@ -127,8 +94,8 @@ test('input event triggers re-render', async (t) => {
   server.connect(socket)
 })
 
-test('state machine stream processes events', async (t) => {
-  t.plan(3)
+test('state machine transitions', async (t) => {
+  t.plan(5)
 
   const app = cellery`
     <Container id="main">
@@ -138,7 +105,6 @@ test('state machine stream processes events', async (t) => {
 
   const status = app.children[0]
 
-  // a simple state machine: idle -> loading -> done
   const stateMachine = new Transform({
     transform(data, cb) {
       if (data.event === 'fetch') {
@@ -157,25 +123,32 @@ test('state machine stream processes events', async (t) => {
 
   const server = new HTMLServer({ app, stream: stateMachine })
 
-  let renders = 0
+  let step = 0
 
   const socket = new Duplex({
     write(data, cb) {
       const msg = JSON.parse(data)
 
-      if (renders === 0) {
-        t.is(msg.id, 'app')
-        renders++
+      if (step === 0) {
+        t.is(msg.id, 'main')
+        step++
         this.push(JSON.stringify({ event: 'fetch' }))
-      } else if (renders === 1) {
-        t.ok(msg.content.includes('loading'), 'status is loading')
-        renders++
-        this.push(JSON.stringify({ event: 'complete' }))
-      } else {
-        t.ok(msg.content.includes('done'), 'status is done')
-        server.close()
+        cb()
+        return
       }
 
+      if (step === 1) {
+        t.is(msg.id, 'status')
+        matchSnapshot(t, msg.content, 'loading state')
+        step++
+        this.push(JSON.stringify({ event: 'complete' }))
+        cb()
+        return
+      }
+
+      t.is(msg.id, 'status')
+      matchSnapshot(t, msg.content, 'done state')
+      server.close()
       cb()
     },
     read(cb) {
