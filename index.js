@@ -176,6 +176,31 @@ class HTMLServer extends ReadyResource {
     this.cellery = new Cellery(app, new HTMLAdapter())
   }
 
+  connect(socket) {
+    this.pipe = pipeline(
+      this.cellery.sub({ event: 'render' }),
+      new Transform({
+        transform(data, cb) {
+          this.push(JSON.stringify(data))
+          cb()
+        }
+      }),
+      socket,
+      new Transform({
+        transform(msg, cb) {
+          try {
+            this.push(JSON.parse(msg.toString('utf-8')))
+          } catch {}
+          cb()
+        }
+      }),
+      this.stream,
+      this.cellery
+    )
+
+    this.cellery.render()
+  }
+
   async _close() {
     if (this.pipe) this.pipe.destroy()
   }
@@ -192,28 +217,7 @@ class HTMLServer extends ReadyResource {
         return
       }
 
-      this.pipe = pipeline(
-        this.cellery.sub({ event: 'render' }),
-        new Transform({
-          transform(data, cb) {
-            this.push(JSON.stringify(data))
-            cb()
-          }
-        }),
-        socket,
-        new Transform({
-          transform(msg, cb) {
-            try {
-              this.push(JSON.parse(msg.toString('utf-8')))
-            } catch {}
-            cb()
-          }
-        }),
-        this.stream,
-        this.cellery
-      )
-
-      this.cellery.render()
+      this.connect(socket)
     })
 
     server.listen(0, this.target.host, () => {
