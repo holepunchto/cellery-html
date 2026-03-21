@@ -6,6 +6,7 @@ const Console = require('bare-console')
 const htmlTemplate = require('./index.html')
 const { Writable, Transform, pipeline } = require('streamx')
 const ReadyResource = require('ready-resource')
+const safetyCatch = require('safety-catch')
 
 const console = new Console()
 const html = String.raw
@@ -171,6 +172,7 @@ class HTMLServer extends ReadyResource {
     this.stream = stream
     this.wss = null
     this.cellery = new Cellery(app, new HTMLAdapter())
+    this.onerror = opts.onerror || safetyCatch
   }
 
   connect(socket) {
@@ -199,7 +201,10 @@ class HTMLServer extends ReadyResource {
           cellery.pub(data)
           cb()
         }
-      })
+      }),
+      (err) => {
+        if (err) this.onerror(err)
+      }
     )
 
     this.cellery.render()
