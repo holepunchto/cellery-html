@@ -1,6 +1,6 @@
 {
   "name": "cellery-html",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "cellery-html",
   "exports": {
     "./package": "./package.json",
@@ -14,7 +14,8 @@
     "package.json",
     "index.js",
     "index.d.ts",
-    "lib"
+    "index.html.js",
+    "output.css"
   ],
   "devDependencies": {
     "bare-fs": "^4.5.5",
