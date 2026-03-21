@@ -7,19 +7,22 @@
         <style>
           
         </style>
-        <span data-cellery-cell="Text" id="greeting" style=""
-        >Hello world!</span
-      >
+        <span data-cellery-cell="Text" id="greeting">Hello world!</span>
       </div>
 === re-render after input event > 1 ===
-<span data-cellery-cell="Text" id="counter" style=""
-        >count: 1</span
+<span data-cellery-cell="Text" id="counter">count: 1</span>
+=== heading renders as h tag > 1 ===
+<div
+        data-cellery-cell="Container"
+        id="main"
+        
       >
+        <style>
+          
+        </style>
+        <h1 data-cellery-cell="Text" id="title">Hello</h1><h2 data-cellery-cell="Text" id="sub">World</h2>
+      </div>
 === state machine transitions > loading state ===
-<span data-cellery-cell="Text" id="status" style=""
-        >loading</span
-      >
+<span data-cellery-cell="Text" id="status">loading</span>
 === state machine transitions > done state ===
-<span data-cellery-cell="Text" id="status" style=""
-        >done</span
-      >
+<span data-cellery-cell="Text" id="status">done</span>

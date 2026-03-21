@@ -4,7 +4,7 @@ const ws = require('bare-ws')
 const http = require('bare-http1')
 const Console = require('bare-console')
 const htmlTemplate = require('./index.html')
-const { Transform, pipeline } = require('streamx')
+const { Writable, Transform, pipeline } = require('streamx')
 const ReadyResource = require('ready-resource')
 
 const console = new Console()
@@ -70,7 +70,7 @@ function renderStyle(cell) {
 
 class HTMLAdapter {
   components = {
-    App: function () {
+    Fragment: function () {
       return renderChildren.call(this)
     },
     Container: function () {
@@ -92,22 +92,19 @@ class HTMLAdapter {
         ${renderChildren.call(this)}
       </div>`
     },
-    Paragraph: function (style) {
-      return html`<span
-        data-cellery-cell="Paragraph"
-        id="${this.id}"
-        class="text-wrap"
-        style="${style}"
-        >${renderChildren.call(this)}</span
-      >`
-    },
     Text: function (style) {
-      const id = this.id ? `id="${this.id}"` : ''
+      const tag = this.heading ? `h${this.heading}` : this.paragraph ? 'p' : 'span'
+
+      let attributes = this.id ? `id="${this.id}"` : ''
+      if (this.paragraph) {
+        attributes += ' class="text-wrap"'
+      }
+      if (style) {
+        attributes += ` style="${style}"`
+      }
 
       // todo: fix safety
-      return html`<span data-cellery-cell="Text" ${id} style="${style}"
-        >${this.value.toString()}</span
-      >`
+      return `<${tag} data-cellery-cell="Text" ${attributes}>${this.value.toString()}</${tag}>`
     },
     Input: function () {
       // TODO: options
@@ -177,6 +174,8 @@ class HTMLServer extends ReadyResource {
   }
 
   connect(socket) {
+    const cellery = this.cellery
+
     this.pipe = pipeline(
       this.cellery.sub({ event: 'render' }),
       new Transform({
@@ -195,7 +194,12 @@ class HTMLServer extends ReadyResource {
         }
       }),
       this.stream,
-      this.cellery
+      new Writable({
+        write(data, cb) {
+          cellery.pub(data)
+          cb()
+        }
+      })
     )
 
     this.cellery.render()

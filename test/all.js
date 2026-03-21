@@ -2,12 +2,12 @@
 
 runTests()
 
-async function runTests() {
+async function runTests () {
   const test = (await import('brittle')).default
 
   test.pause()
 
-  await import('./styles.js')
+  await import('./render.js')
   await import('./server.js')
 
   test.resume()

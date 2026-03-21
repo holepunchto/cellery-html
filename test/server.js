@@ -1,11 +1,15 @@
 const test = require('brittle')
 const { HTMLServer } = require('..')
-const { cellery } = require('cellery')
+const { cellery, Cell } = require('cellery')
 const { Duplex, Transform } = require('streamx')
 const { matchSnapshot } = require('brittle-snapshot')
 
 test('initial render', async (t) => {
   t.plan(3)
+
+  t.teardown(() => {
+    Cell.cellery = undefined
+  })
 
   const app = cellery`
     <Container id="main">
@@ -43,6 +47,10 @@ test('initial render', async (t) => {
 
 test('re-render after input event', async (t) => {
   t.plan(3)
+
+  t.teardown(() => {
+    Cell.cellery = undefined
+  })
 
   const app = cellery`
     <Container id="main">
@@ -94,8 +102,54 @@ test('re-render after input event', async (t) => {
   server.connect(socket)
 })
 
+test('heading renders as h tag', async (t) => {
+  t.plan(3)
+
+  t.teardown(() => {
+    Cell.cellery = undefined
+  })
+
+  const app = cellery`
+    <Container id="main">
+      <Text id="title" heading=1>Hello</Text>
+      <Text id="sub" heading=2>World</Text>
+    </Container>
+  `
+
+  const stream = new Transform({
+    transform(data, cb) {
+      this.push(data)
+      cb()
+    }
+  })
+
+  const server = new HTMLServer({ app, stream })
+
+  const socket = new Duplex({
+    write(data, cb) {
+      const msg = JSON.parse(data)
+
+      t.is(msg.event, 'render')
+      t.is(msg.id, 'main')
+      matchSnapshot(t, msg.content)
+
+      server.close()
+      cb()
+    },
+    read(cb) {
+      cb(null)
+    }
+  })
+
+  server.connect(socket)
+})
+
 test('state machine transitions', async (t) => {
   t.plan(5)
+
+  t.teardown(() => {
+    Cell.cellery = undefined
+  })
 
   const app = cellery`
     <Container id="main">
