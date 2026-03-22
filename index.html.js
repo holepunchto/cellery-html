@@ -28,10 +28,15 @@ module.exports = ({ port, token, isAndroid, isIOS }) =>
           socket.onmessage = (msg) => {
             const { id, content, insert, value, clear, destroy } = JSON.parse(msg.data)
 
-            const target = document.getElementById(id)
-            console.log(target)
+            if (!id && content) {
+              const target = document.getElementById('app')
+              target.innerHTML = content
+              return
+            }
 
-            if (!target) {
+            const target = document.getElementById(id)
+
+            if (id && !target) {
               socket.send(JSON.stringify({ error: 'NOT_FOUND', id }))
               return
             }

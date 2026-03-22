@@ -77,7 +77,7 @@ class HTMLAdapter {
     Container: function () {
       let style = ''
       if (this.style) {
-        if (this.id) this.style.addScope(`[data-cellery-cell="Container"]`, this.id)
+        if (this.id) this.style.addScope(this.id)
         style = this.style.toCSS()
       }
       const id = this.id ? `id="${this.id}"` : ''
