@@ -1,6 +1,6 @@
 {
   "name": "cellery-html",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "cellery-html",
   "exports": {
     "./package": "./package.json",
@@ -48,7 +48,7 @@
     "bare-process": "^4.3.0",
     "bare-ws": "^2.1.0",
     "brittle-snapshot": "^1.0.1",
-    "cellery": "^1.4.2",
+    "cellery": "^1.4.3",
     "ptnm": "^1.0.0",
     "ready-resource": "^1.2.0",
     "safety-catch": "^1.0.3",

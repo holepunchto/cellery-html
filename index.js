@@ -130,7 +130,7 @@ class HTMLAdapter {
         autofocus
       ></textarea>`
     },
-    Detail: function () {
+    Details: function () {
       const id = this.id ? `id="${this.id}"` : ''
       const cls = this.class ? `class="${this.class}"` : ''
       return `<details data-cellery-cell="Detail" ${id} ${cls}>${renderChildren.call(this)}</details>`
