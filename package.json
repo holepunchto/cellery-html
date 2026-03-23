@@ -49,6 +49,7 @@
     "bare-ws": "^2.1.0",
     "brittle-snapshot": "^1.0.1",
     "cellery": "^1.4.2",
+    "ptnm": "^1.0.0",
     "ready-resource": "^1.2.0",
     "safety-catch": "^1.0.3",
     "streamx": "^2.23.0"

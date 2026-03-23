@@ -6,6 +6,7 @@ const Console = require('bare-console')
 const htmlTemplate = require('./index.html')
 const { Writable, Transform, pipeline } = require('streamx')
 const ReadyResource = require('ready-resource')
+const match = require('ptnm')
 const safetyCatch = require('safety-catch')
 
 const console = new Console()
@@ -158,14 +159,14 @@ class HTMLAdapter {
 }
 
 function isAction(event, id) {
-  return Iambus.match(event, {
+  return match(event, {
     event: 'keydown',
     data: { id, key: 'Enter', shift: false }
   })
 }
 
 function isClick(event, id) {
-  return Iambus.match(event, { event: 'click', data: { id } })
+  return match(event, { event: 'click', data: { id } })
 }
 
 class HTMLServer extends ReadyResource {
