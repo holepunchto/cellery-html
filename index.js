@@ -69,6 +69,11 @@ function renderStyle(cell) {
   return style.join('')
 }
 
+function renderClass(cell, ...extra) {
+  const classes = [cell.class, ...extra].filter(Boolean)
+  return classes.length ? `class="${classes.join(' ')}"` : ''
+}
+
 class HTMLAdapter {
   components = {
     Fragment: function () {
@@ -80,32 +85,26 @@ class HTMLAdapter {
         if (this.id) this.style.addScope(this.id)
         style = this.style.toCSS()
       }
+      const cls = renderClass(this)
       const id = this.id ? `id="${this.id}"` : ''
+      const tag = this.events ? 'button' : 'div'
 
-      return html`<div
-        data-cellery-cell="Container"
-        ${id}
-        ${this.onclick ? 'onclick="onClick(this)"' : ''}
-      >
+      return html`<${tag} ${id} ${cls}>
         <style>
           ${style}
         </style>
         ${renderChildren.call(this)}
-      </div>`
+      </${tag}>`
     },
     Text: function (style) {
       const tag = this.heading ? `h${this.heading}` : this.paragraph ? 'p' : 'span'
 
-      let attributes = this.id ? `id="${this.id}"` : ''
-      if (this.paragraph) {
-        attributes += ' class="text-wrap"'
-      }
-      if (style) {
-        attributes += ` style="${style}"`
-      }
+      const id = this.id ? `id="${this.id}"` : ''
+      const cls = renderClass(this, this.paragraph ? 'text-wrap' : '')
+      const inlineStyle = style ? `style="${style}"` : ''
 
       // todo: fix safety
-      return `<${tag} data-cellery-cell="Text" ${attributes}>${this.value.toString()}</${tag}>`
+      return `<${tag} data-cellery-cell="Text" ${id} ${cls} ${inlineStyle}>${this.value.toString()}</${tag}>`
     },
     Input: function () {
       // TODO: options
@@ -129,15 +128,21 @@ class HTMLAdapter {
         placeholder="${this.placeholder}"
         autofocus
       ></textarea>`
+    },
+    Detail: function () {
+      const id = this.id ? `id="${this.id}"` : ''
+      const cls = this.class ? `class="${this.class}"` : ''
+      return `<details data-cellery-cell="Detail" ${id} ${cls}>${this.value.toString()}</details>`
+    },
+
+    Summary: function () {
+      const id = this.id ? `id="${this.id}"` : ''
+      const cls = this.class ? `class="${this.class}"` : ''
+      return `<summary data-cellery-cell="Summary" ${id} ${cls}>${this.value.toString()}</summary>`
     }
   }
 
   _renderCell(component) {
-    if (component._render) {
-      // get the cell out without triggering another render
-      component = component._render()
-    }
-
     component.renderer = this
     const style = renderStyle(component)
     const rendererFn = this.components[component.constructor.name || component.parent]
@@ -166,10 +171,10 @@ function isClick(event, id) {
 class HTMLServer extends ReadyResource {
   constructor(opts = {}) {
     super()
-    const { target, app, stream } = opts
+    const { target, app, streams = [defaultTransform] } = opts
 
     this.target = target
-    this.stream = stream
+    this.streams = streams
     this.wss = null
     this.cellery = new Cellery(app, new HTMLAdapter())
     this.onerror = opts.onerror || safetyCatch
@@ -179,23 +184,18 @@ class HTMLServer extends ReadyResource {
     const cellery = this.cellery
 
     this.pipe = pipeline(
-      this.cellery.sub({ event: 'render' }),
+      this.cellery.sub({}),
       new Transform({
         transform(data, cb) {
+          if (data.event !== 'render' && data.event !== 'register') return cb()
+
+          console.log(data)
           this.push(JSON.stringify(data))
           cb()
         }
       }),
       socket,
-      new Transform({
-        transform(msg, cb) {
-          try {
-            this.push(JSON.parse(msg.toString('utf-8')))
-          } catch {}
-          cb()
-        }
-      }),
-      this.stream,
+      ...this.streams,
       new Writable({
         write(data, cb) {
           cellery.pub(data)
@@ -243,6 +243,15 @@ class HTMLServer extends ReadyResource {
     })
   }
 }
+
+const defaultTransform = new Transform({
+  transform(msg, cb) {
+    try {
+      this.push(JSON.parse(msg.toString('utf-8')))
+    } catch {}
+    cb()
+  }
+})
 
 module.exports = {
   isAction,
