@@ -1,39 +1,32 @@
 === styling > 1 ===
 [data-cellery-cell="Container"]{flex:1 1 auto;padding:0.5rem;color:#00c950;border:1px solid #00c950;display:flex;align-items:center;justify-content:space-between}[data-cellery-cell="Container"]:hover{color:#00d3f2;border:1px solid #00d3f2;cursor:pointer}
 === styling > 2 ===
-<div
-        data-cellery-cell="Container"
-        id="main"
-        
-      >
+<div id="main"  data-cellery-cell="Container">
         <style>
           #main [data-cellery-cell="Container"]{flex:1 1 auto;padding:0.5rem;color:#00c950;border:1px solid #00c950;display:flex;align-items:center;justify-content:space-between}#main [data-cellery-cell="Container"]:hover{color:#00d3f2;border:1px solid #00d3f2;cursor:pointer}
         </style>
-        <span data-cellery-cell="Text" >Hello world!</span><span data-cellery-cell="Text" ></span>
+        <div   data-cellery-cell="Container">
+        <style>
+          
+        </style>
+        <span data-cellery-cell="Text"   >Hello world!</span><span data-cellery-cell="Text"   ></span>
+      </div>
       </div>
 === styles - html > 1 ===
 #main{flex:1 1 auto;display:flex;flex-flow:row;padding:1em}
 === styles - html > 2 ===
-<div
-        data-cellery-cell="Container"
-        id="main"
-        
-      >
+<div id="main"  data-cellery-cell="Container">
         <style>
           
         </style>
-        <p data-cellery-cell="Text"  class="text-wrap">Loading...</p>
+        <p data-cellery-cell="Text"  class="text-wrap" >Loading...</p>
       </div>
 === styles - html events > 1 ===
-[data-cellery-cell="div"]{flex:1 1 auto;padding:0.5rem;color:#00c950;border:1px solid #00c950;display:flex;align-items:center;justify-content:space-between}[data-cellery-cell="div"]:hover{color:#00d3f2;border:1px solid #00d3f2;cursor:pointer}
+div{flex:1 1 auto;padding:0.5rem;color:#00c950;border:1px solid #00c950;display:flex;align-items:center;justify-content:space-between}div:hover{color:#00d3f2;border:1px solid #00d3f2;cursor:pointer}
 === styles - html events > 2 ===
-<div
-        data-cellery-cell="Container"
-        id="my-id"
-        
-      >
+<button id="my-id"  data-cellery-cell="Container">
         <style>
-          [data-cellery-cell="div"]{flex:1 1 auto;padding:0.5rem;color:#00c950;border:1px solid #00c950;display:flex;align-items:center;justify-content:space-between}[data-cellery-cell="div"]:hover{color:#00d3f2;border:1px solid #00d3f2;cursor:pointer}
+          #my-id div{flex:1 1 auto;padding:0.5rem;color:#00c950;border:1px solid #00c950;display:flex;align-items:center;justify-content:space-between}#my-id div:hover{color:#00d3f2;border:1px solid #00d3f2;cursor:pointer}
         </style>
-        <span data-cellery-cell="Text" >Hello</span><span data-cellery-cell="Text" >world</span>
-      </div>
+        <span data-cellery-cell="Text"   >Hello</span><span data-cellery-cell="Text"   >world</span>
+      </button>

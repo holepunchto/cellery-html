@@ -18,13 +18,14 @@ test('initial render', async (t) => {
   `
 
   const stream = new Transform({
-    transform(data, cb) {
+    transform(msg, cb) {
+      const data = JSON.parse(msg)
       this.push(data)
       cb()
     }
   })
 
-  const server = new HTMLServer({ app, stream })
+  const server = new HTMLServer({ app, streams: [stream] })
 
   const socket = new Duplex({
     write(data, cb) {
@@ -62,7 +63,9 @@ test('re-render after input event', async (t) => {
   const counter = app.children[0]
 
   const stream = new Transform({
-    transform(data, cb) {
+    transform(msg, cb) {
+      const data = JSON.parse(msg)
+
       if (data.event === 'increment') {
         count++
         counter.value = 'count: ' + count
@@ -72,7 +75,7 @@ test('re-render after input event', async (t) => {
     }
   })
 
-  const server = new HTMLServer({ app, stream })
+  const server = new HTMLServer({ app, streams: [stream] })
 
   let initial = true
 
@@ -123,7 +126,7 @@ test('heading renders as h tag', async (t) => {
     }
   })
 
-  const server = new HTMLServer({ app, stream })
+  const server = new HTMLServer({ app, streams: [stream] })
 
   const socket = new Duplex({
     write(data, cb) {
@@ -160,7 +163,9 @@ test('state machine transitions', async (t) => {
   const status = app.children[0]
 
   const stateMachine = new Transform({
-    transform(data, cb) {
+    transform(msg, cb) {
+      const data = JSON.parse(msg)
+
       if (data.event === 'fetch') {
         status.value = 'loading'
         status.render()
@@ -175,7 +180,7 @@ test('state machine transitions', async (t) => {
     }
   })
 
-  const server = new HTMLServer({ app, stream: stateMachine })
+  const server = new HTMLServer({ app, streams: [stateMachine] })
 
   let step = 0
 

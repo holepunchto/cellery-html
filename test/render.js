@@ -9,7 +9,7 @@ test('styling', async (t) => {
   const cell = cellery`
     <Container id="main">
       <Style>
-        Container {
+        [data-cellery-cell="Container"] {
           flex: 1 1 auto;
           padding: 0.5rem;
           color: #00c950;
@@ -19,15 +19,17 @@ test('styling', async (t) => {
           justify-content: space-between;
         }
 
-        Container:hover {
+        [data-cellery-cell="Container"]:hover {
           color: #00d3f2;
           border: 1px solid #00d3f2;
           cursor: pointer;
         }
       </Style>
 
-      <Text>Hello world!</Text>
-      <Text>2026</Text>
+      <div>
+        <Text>Hello world!</Text>
+        <Text>2026</Text>
+      </div>
     </Container>
   `
 

@@ -89,7 +89,7 @@ class HTMLAdapter {
       const id = this.id ? `id="${this.id}"` : ''
       const tag = this.events ? 'button' : 'div'
 
-      return html`<${tag} ${id} ${cls}>
+      return html`<${tag} ${id} ${cls} data-cellery-cell="Container">
         <style>
           ${style}
         </style>
@@ -132,7 +132,7 @@ class HTMLAdapter {
     Detail: function () {
       const id = this.id ? `id="${this.id}"` : ''
       const cls = this.class ? `class="${this.class}"` : ''
-      return `<details data-cellery-cell="Detail" ${id} ${cls}>${this.value.toString()}</details>`
+      return `<details data-cellery-cell="Detail" ${id} ${cls}>${renderChildren.call(this)}</details>`
     },
 
     Summary: function () {
@@ -189,7 +189,6 @@ class HTMLServer extends ReadyResource {
         transform(data, cb) {
           if (data.event !== 'render' && data.event !== 'register') return cb()
 
-          console.log(data)
           this.push(JSON.stringify(data))
           cb()
         }
