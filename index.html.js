@@ -26,7 +26,9 @@ module.exports = ({ port, token, isAndroid, isIOS }) =>
           const socket = new WebSocket('ws://localhost:${port}?token=${token}')
 
           socket.onmessage = (msg) => {
-            const { id, content, insert, value, clear, destroy } = JSON.parse(msg.data)
+            const { id, content, insert, value, clear, destroy, event, targets } = JSON.parse(
+              msg.data
+            )
 
             if (!id && content) {
               const target = document.getElementById('app')
@@ -41,6 +43,23 @@ module.exports = ({ port, token, isAndroid, isIOS }) =>
               return
             }
 
+            if (event === 'register') {
+              for (const t of targets) {
+                target.addEventListener(t, () => {
+                  socket.send(
+                    JSON.stringify({
+                      event: 'click',
+                      data: {
+                        id: target.id
+                      }
+                    })
+                  )
+                })
+              }
+              // @todo off?
+            }
+
+            // @todo simplify
             if (destroy) {
               target.remove()
               return
@@ -65,17 +84,6 @@ module.exports = ({ port, token, isAndroid, isIOS }) =>
           }
 
           const supportedKeys = ['Enter', 'ArrowUp', 'ArrowDown']
-
-          function onClick(target) {
-            socket.send(
-              JSON.stringify({
-                event: 'click',
-                data: {
-                  id: target.id
-                }
-              })
-            )
-          }
 
           document.addEventListener('keydown', (e) => {
             // TODO: register for events
