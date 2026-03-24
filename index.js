@@ -98,7 +98,13 @@ class HTMLAdapter {
       </${tag}>`
     },
     Text: function (style) {
-      const tag = this.heading ? `h${this.heading}` : this.paragraph ? 'p' : 'span'
+      const tag = this.heading
+        ? `h${this.heading}`
+        : this.paragraph
+          ? 'p'
+          : this.pre
+            ? 'pre'
+            : 'span'
 
       const id = this.id ? `id="${this.id}"` : ''
       const cls = renderClass(this, this.paragraph ? 'text-wrap' : '')
@@ -144,6 +150,7 @@ class HTMLAdapter {
   }
 
   _renderCell(component) {
+    component = component._render()
     component.renderer = this
     const style = renderStyle(component)
     const rendererFn = this.components[component.constructor.name || component.parent]
