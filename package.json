@@ -1,6 +1,6 @@
 {
   "name": "cellery-html",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "cellery-html",
   "exports": {
     "./package": "./package.json",
