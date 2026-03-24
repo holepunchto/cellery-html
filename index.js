@@ -78,7 +78,11 @@ function renderClass(cell, ...extra) {
 class HTMLAdapter {
   components = {
     Fragment: function () {
-      return renderChildren.call(this)
+      let style = ''
+      if (this.style) {
+        style = `<style>${this.style.toCSS()}</style>`
+      }
+      return style + renderChildren.call(this)
     },
     Container: function () {
       let style = ''
