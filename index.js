@@ -245,7 +245,9 @@ class HTMLServer extends ReadyResource {
       console.log('ws listening on', this.target.host, port)
 
       if (!this.target.headless) {
-        const window = new Window(800, 600)
+        const width = this.target.width || 800
+        const height = this.target.height || 600
+        const window = new Window(width, height)
         const webView = new WebView()
         window.content(webView)
         webView.loadHTML(htmlTemplate({ ...this.target, port, token }))

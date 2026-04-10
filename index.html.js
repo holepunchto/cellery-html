@@ -2,26 +2,19 @@ const css = require('./output.css', { with: { type: 'text' } })
 
 const html = String.raw
 
-module.exports = ({ port, token, isAndroid, isIOS }) =>
+module.exports = ({ title, port, token }) =>
   html`<!doctype html>
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
-        <title>Git+Pear</title>
+        <title>${title}</title>
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <style>
           ${css}
         </style>
       </head>
       <body class="bg-black font-mono overflow-hidden">
-        <main
-          id="app"
-          class="container mx-auto w-screen overflow-hidden flex flex-col text-green-500 p-2 ${isAndroid
-            ? 'h-screen pb-12 pt-14'
-            : isIOS
-              ? 'h-[90vh]'
-              : 'h-screen'}"
-        ></main>
+        <main id="app"></main>
         <script>
           const socket = new WebSocket('ws://localhost:${port}?token=${token}')
 
@@ -45,15 +38,25 @@ module.exports = ({ port, token, isAndroid, isIOS }) =>
 
             if (event === 'register') {
               for (const t of targets) {
-                target.addEventListener(t, () => {
-                  socket.send(
-                    JSON.stringify({
-                      event: 'click',
-                      data: {
-                        id: target.id
-                      }
-                    })
-                  )
+                target.addEventListener(t, (e) => {
+                  let value
+
+                  if (t === 'submit') {
+                    e.preventDefault()
+                    const formData = new FormData(e.target)
+                    value = Object.fromEntries(formData)
+                    target.reset()
+                  }
+
+                  const data = {
+                    event: t,
+                    data: {
+                      id,
+                      value
+                    }
+                  }
+
+                  socket.send(JSON.stringify(data))
                 })
               }
               // @todo off?
